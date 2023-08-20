@@ -1,0 +1,48 @@
+http:
+  port: 3000
+admin:
+  port: 9876
+  host: localhost
+apiEndpoints:
+  service-url:
+    host: localhost
+    paths: ['/short/*', '/short' ]
+  service-correios:
+    host: localhost
+    methods: 'GET,POST,PUT'
+    paths: ['/track/*', '/track' ]
+serviceEndpoints:
+  short:
+    url: 'http://localhost:3001'
+  track:
+    url: 'http://localhost:3002'
+policies:
+  - basic-auth
+  - cors
+  - expression
+  - key-auth
+  - log
+  - oauth2
+  - proxy
+  - rate-limit
+pipelines:
+  short:
+    apiEndpoints: 
+      - service-url
+      - service-correios
+    policies: 
+      - proxy:
+        - action:
+            serviceEndpoint: short
+            changeOrigin: true
+        - action:
+            serviceEndpoint: track
+            changeOrigin: true
+  track:
+    apiEndpoints: 
+      - service-correios
+    policies: 
+      - proxy:
+        - action:
+            serviceEndpoint: track
+            changeOrigin: true
